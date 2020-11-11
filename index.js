@@ -29,6 +29,6 @@ app.all("*", (req, res) => {
   res.status(404).json({ message: error.message });
 });
 
-app.listen(3000, () => {
+app.listen(3005, () => {
   console.log("Server Started");
 });
