@@ -10,32 +10,32 @@ app.use(formidable());
 app.use(cors());
 
 require("dotenv").config();
-mongoose.connect(process.env.MONGODB_URI);
-app.listen(process.env.PORT, () => {
-  console.log("Server started");
-});
 
-mongoose.connect("mongodb://localhost/Vinted", {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
 });
 
+// mongoose.connect("mongodb://localhost/Vinted",
+
 cloudinary.config({
   cloud_name: "dshrnc165",
-  api_key: "142326715193618",
-  api_secret: "AEmEXr079dlpkYIHfOwfgDd4JNg",
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const userRoutes = require("./routes/user");
 app.use(userRoutes);
 const offerRoutes = require("./routes/offer");
 app.use(offerRoutes);
+const paymentRoutes = require("./routes/payment");
+app.use(paymentRoutes);
 
 app.all("*", (req, res) => {
   res.status(404).json({ message: error.message });
 });
 
-app.listen(3005, () => {
-  console.log("Server Started");
+app.listen(process.env.PORT, () => {
+  console.log("Server started");
 });

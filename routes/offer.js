@@ -7,52 +7,6 @@ const Offer = require("../models/Offer");
 
 const isAuthenticated = require("../middlewares/isAuthenticated");
 
-router.post("/offer/publish", isAuthenticated, async (req, res) => {
-  try {
-    // console.log(req.fields);
-    // console.log(req.files.picture.path);
-
-    const {
-      title,
-      description,
-      price,
-      brand,
-      city,
-      condition,
-      color,
-      size,
-    } = req.fields;
-
-    const newOffer = new Offer({
-      product_name: title,
-      product_description: description,
-      product_price: price,
-      product_details: [
-        { MARQUE: brand },
-        { TAILLE: size },
-        { COULEUR: color },
-        { ÉTAT: condition },
-        { EMPLACEMENT: city },
-      ],
-      owner: req.user,
-    });
-
-    // console.log(newOffer);
-
-    const result = await cloudinary.uploader.upload(req.files.picture.path, {
-      folder: `/vinted/offers/${newOffer._id}`,
-    });
-    // console.log(result);
-
-    newOffer.product_image = result;
-
-    await newOffer.save();
-    res.json(newOffer);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
 router.get("/offers", async (req, res) => {
   try {
     let filters = {};
@@ -109,4 +63,122 @@ router.get("/offers", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+
+router.get("/offer/:id", async (req, res) => {
+  try {
+    const offer = await Offer.findById(req.params.id).populate({
+      path: "owner",
+      select: "account.username account.phone account.avatar",
+    });
+    res.json(offer);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.post("/offer/publish", isAuthenticated, async (req, res) => {
+  try {
+    // console.log(req.fields);
+    // console.log(req.files.picture.path);
+
+    const {
+      title,
+      description,
+      price,
+      brand,
+      city,
+      condition,
+      color,
+      size,
+    } = req.fields;
+
+    const newOffer = new Offer({
+      product_name: title,
+      product_description: description,
+      product_price: price,
+      product_details: [
+        { MARQUE: brand },
+        { TAILLE: size },
+        { COULEUR: color },
+        { ÉTAT: condition },
+        { EMPLACEMENT: city },
+      ],
+      owner: req.user,
+    });
+
+    // console.log(newOffer);
+
+    const result = await cloudinary.uploader.upload(req.files.picture.path, {
+      folder: `/vinted/offers/${newOffer._id}`,
+    });
+    // console.log(result);
+
+    newOffer.product_image = result;
+
+    await newOffer.save();
+    res.json(newOffer);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.put("/offer/update/:id", isAuthenticated, async (req, res) => {
+  const offerToModify = await Offer.findById(req.params.id);
+  try {
+    if (req.fields.title) {
+      offerToModify.product_name = req.fields.title;
+    }
+    if (req.fields.description) {
+      offerToModify.product_description = req.fields.description;
+    }
+    if (req.fields.price) {
+      offerToModify.product_price = req.fields.price;
+    }
+
+    const details = offerToModify.product_details;
+    for (i = 0; i < details.length; i++) {
+      if (details[i].MARQUE) {
+        if (req.fields.brand) {
+          details[i].MARQUE = req.fields.brand;
+        }
+      }
+      if (details[i].TAILLE) {
+        if (req.fields.size) {
+          details[i].TAILLE = req.fields.size;
+        }
+      }
+      if (details[i].ÉTAT) {
+        if (req.fields.condition) {
+          details[i].ÉTAT = req.fields.condition;
+        }
+      }
+      if (details[i].COULEUR) {
+        if (req.fields.color) {
+          details[i].COULEUR = req.fields.color;
+        }
+      }
+      if (details[i].EMPLACEMENT) {
+        if (req.fields.location) {
+          details[i].EMPLACEMENT = req.fields.location;
+        }
+      }
+    }
+
+    offerToModify.markModified("product_details");
+
+    if (req.files.picture) {
+      const result = await cloudinary.uploader.upload(req.files.picture.path, {
+        folder: `/vinted/offers/${offerToModify._id}`,
+      });
+      offerToModify.product_image = result;
+    }
+
+    await offerToModify.save();
+
+    res.status(200).json("Offer modified succesfully !");
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 module.exports = router;
