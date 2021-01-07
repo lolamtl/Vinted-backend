@@ -48,7 +48,10 @@ router.get("/offers", async (req, res) => {
     let limit = Number(req.query.limit);
 
     const offers = await Offer.find(filters)
-      .select("product_name product_price")
+      .populate({
+        path: "owner",
+        select: "account",
+      })
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(limit);
@@ -108,9 +111,14 @@ router.post("/offer/publish", isAuthenticated, async (req, res) => {
 
     // console.log(newOffer);
 
-    const result = await cloudinary.uploader.upload(req.files.picture.path, {
-      folder: `/vinted/offers/${newOffer._id}`,
-    });
+    const result = await cloudinary.uploader.unsigned_upload(
+      req.files.picture.path,
+      {
+        folder: `/vinted/offers/${newOffer._id}`,
+        public_id: "preview",
+        cloud_name: "dshrnc165",
+      }
+    );
     // console.log(result);
 
     newOffer.product_image = result;
