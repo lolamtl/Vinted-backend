@@ -110,16 +110,9 @@ router.post("/offer/publish", isAuthenticated, async (req, res) => {
     });
 
     // console.log(newOffer);
-
-    const result = await cloudinary.uploader.unsigned_upload(
-      req.files.picture.path,
-      {
-        folder: `/vinted/offers/${newOffer._id}`,
-        public_id: "preview",
-        cloud_name: "dshrnc165",
-      }
-    );
-    // console.log(result);
+    const result = await cloudinary.uploader.upload(req.files.picture.path, {
+      folder: `/vinted/offers/${newOffer._id}`,
+    });
 
     newOffer.product_image = result;
 

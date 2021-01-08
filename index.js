@@ -36,7 +36,7 @@ app.all("*", (req, res) => {
   res.status(404).json({ message: error.message });
 });
 
-const server = app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT, () => {
   console.log("Server started");
 });
-server.timeout = Number(process.env.SERVER_TIMEOUT) || 1000000;
+// server.timeout = Number(process.env.SERVER_TIMEOUT) || 1000000;
