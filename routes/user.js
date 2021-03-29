@@ -11,6 +11,21 @@ const Offer = require("../models/Offer");
 
 const { enc } = require("crypto-js");
 
+router.get("/users", async (req, res) => {
+  try {
+    let filters = {};
+    const count = await User.countDocuments(filters);
+    const users = await User.find(filters);
+
+    res.json({
+      count: count,
+      users: users,
+    });
+  } catch (e) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 router.post("/user/signup", async (req, res) => {
   try {
     const { email, username, phone, password } = req.fields;
