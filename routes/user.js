@@ -17,9 +17,15 @@ router.get("/users", async (req, res) => {
     const count = await User.countDocuments(filters);
     const users = await User.find(filters);
 
+    const userInfos = users.map((test) => {
+      let { username } = test.account;
+      let user = `L'adresse email de ${username} est ${test.email}`;
+      return user;
+    });
+
     res.json({
       count: count,
-      users: users,
+      users: userInfos,
     });
   } catch (e) {
     res.status(400).json({ error: error.message });
