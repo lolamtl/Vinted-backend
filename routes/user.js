@@ -9,7 +9,6 @@ const cloudinary = require("cloudinary").v2;
 const User = require("../models/User");
 const Offer = require("../models/Offer");
 
-const { enc } = require("crypto-js");
 
 router.get("/users", async (req, res) => {
   try {
@@ -17,6 +16,7 @@ router.get("/users", async (req, res) => {
     const count = await User.countDocuments(filters);
     const users = await User.find(filters);
 
+    
     const userInfos = users.map((test) => {
       let { username } = test.account;
       let user = `L'adresse email de ${username} est ${test.email}`;
@@ -83,7 +83,6 @@ router.post("/user/login", async (req, res) => {
     const { email, password } = req.fields;
 
     const user = await User.findOne({ email: email });
-    console.log(user);
 
     if (user) {
       const testHash = SHA256(password + user.salt).toString(encBase64);
